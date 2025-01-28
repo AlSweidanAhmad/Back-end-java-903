@@ -6,14 +6,15 @@ import model.Account;
 //import main.project.model.Account;
 //import main.project.model.Account;
 
-
-
+import java.util.List;
 import java.util.Scanner;
 
 public class ApplicationServiceImpl implements ApplicationService {
 //    private Scanner scanner = new Scanner(System.in);
 //    private ValidationService validationService = new ValidationServiceImpl();
 //    private AccountService accountService = new AccountServiceImpl();
+	private Account account;
+	private Account receiverAccount;
 	@Override
     public void run() {
         Scanner scanner = new Scanner(System.in);
@@ -31,11 +32,11 @@ public class ApplicationServiceImpl implements ApplicationService {
         switch (choose) {
             case 'a':
                 login();
-                ac = 4;
+//                ac = 4;
                 break;
             case 'b':
                 signup();
-                ac = 4;
+//                ac = 4;
                 break;
             case 'c':
                 System.out.println("you are welcome.");
@@ -74,7 +75,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         // TODO SERVICE OF ACCOUNT TO CREATE ACCOUNT
 
         AccountService accountService = new AccountServiceImpl();
-        Account account = new Account(name, password);
+        account = new Account(name, password);
         // TODO   impl createAccount
         boolean isAccountCreated = accountService.createAccount(account);
         if (isAccountCreated) {
@@ -121,7 +122,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     }
     private void services() {
-    	Account account = new Account();
+    	
         Scanner scanner = new Scanner(System.in);
 
     	char choose;
@@ -153,6 +154,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             break;
         case '6':
             System.out.println("EraaSoft wishes you a wonderful day. Thank you for using our service!");
+            choose = 6;
             break;
         default:
             System.out.println("Invalid Choose");
@@ -180,13 +182,12 @@ public class ApplicationServiceImpl implements ApplicationService {
           return;
       }
       // Validation of the Account
-      if (!accountService.isValidAccount(account)) {
+      if (!accountService.isDeposit(account,amount)) {
           System.out.println("Deposit failed due to account issues.");
           return;
       }
       
       // Make a deposit
-      account.setBalance(account.getBalance() + amount);
       System.out.println("Deposit successful. New balance: " + account.getBalance());
 	
 
@@ -213,15 +214,12 @@ public class ApplicationServiceImpl implements ApplicationService {
             return;
         }
         // Validation of the Account
-        if (!accountService.isValidAccount(account)) {
+        if (!accountService.isWithdraw(account,amount)) {
             System.out.println("Withdraw failed due to account issues.");
             return;
         }
         // Check sufficient balance
-        if (account.getBalance() < amount) {
-            System.out.println("Insufficient funds. Withdrawal failed.");
-            return;
-        }
+
         
         // Make a Withdrawal
   		account.setBalance(account.getBalance() - amount);
@@ -272,37 +270,35 @@ public class ApplicationServiceImpl implements ApplicationService {
         
         System.out.println("Enter the amount between " + minAmount + " and " + maxAmount + " to Transfer:");
         amount = scanner.nextInt();
-    	  
-        // Check sufficient balance
-        if (withdrawAccount.getBalance() < amount) {
-            System.out.println("Insufficient funds. Transfer failed.");
-            return;
-        }
+        scanner.nextLine();
         
         // Validation of the amount
         if (! validationService.validateAmount(amount,  minAmount, maxAmount)) {
             System.out.println("Transfer failed due to invalid amount.");
             return;
         }
-        // Validation of the Account
-        if (!accountService.isValidAccount(withdrawAccount)) {
-            System.out.println("Transfer failed due to sender account issues.");
-            return;
-        }
+//        // Check sufficient balance
+//        if (withdrawAccount.getBalance() < amount) {
+//            System.out.println("Insufficient funds. Transfer failed.");
+//            return;
+//        }
+//        
+//
+//        // Validation of the Account
+//        if (!accountService.isValidAccount(withdrawAccount)) {
+//            System.out.println("Transfer failed due to sender account issues.");
+//            return;
+//        }
 
         String receiverName;
         System.out.println("Please enter the Receiver name: ");
         receiverName = scanner.nextLine();
-        Account receiverAccount = accountService.geAccountByname(receiverName);
+        this.receiverAccount = accountService.geAccountByname(receiverName);
 
         
-        if (!accountService.isValidAccount(receiverAccount)) {
-            System.out.println("Transfer failed due to receiver account issues.");
-            return;
-        }
 		
         withdrawAccount.setBalance(withdrawAccount.getBalance() - amount);
-		receiverAccount.setBalance(receiverAccount.getBalance() + amount);
+		this.receiverAccount.setBalance(this.receiverAccount.getBalance() + amount);
         System.out.println("Transfer successful.");
         	
 

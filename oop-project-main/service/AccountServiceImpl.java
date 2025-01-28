@@ -15,7 +15,7 @@ import model.Ewallet;
 
 public class AccountServiceImpl implements AccountService {
 
-    private  Ewallet ewallet = new Ewallet();
+    Ewallet ewallet = Ewallet.getInstance();
 
 
     // Check if the account exists   
@@ -48,12 +48,9 @@ public class AccountServiceImpl implements AccountService {
             return false;
         }
 
-        List<Account> accounts = ewallet.getAccounts();
-        accounts.add(account);
-        ewallet.setAccounts(accounts);
-		System.out.println(account.getPassword()+ " : " +account.getUserName());
-
+        this.ewallet.getAccounts().add(account); 
         return true;
+
     }
 
     
@@ -61,6 +58,7 @@ public class AccountServiceImpl implements AccountService {
     public boolean loginAccount(Account account) {
 
         List<Account> accounts = ewallet.getAccounts();
+        System.out.println(accounts.size());
         for (Account isAccount : accounts) {
             if (isAccount.getUserName().equals(account.getUserName())) {
                 if (isAccount.getPassword().equals(account.getPassword())) {
@@ -95,7 +93,79 @@ public class AccountServiceImpl implements AccountService {
         }
     	return true;	
     }
+    public boolean isDeposit(Account account, int amount) {
+
+        List<Account> accounts = ewallet.getAccounts();     
+        accounts.get(accounts.indexOf(account)).setBalance(account.getBalance() +amount);
+    	return true;
+    }
     
+    
+    public boolean isWithdraw(Account account, int amount) {
+  
+        List<Account> accounts = ewallet.getAccounts();     
+        // Check sufficient balance
+    	if (accounts.get(accounts.indexOf(account)).getBalance()<amount) {
+    		System.out.println("Insufficient funds. Withdrawal failed.");
+    		return false;
+    	}
+        accounts.get(accounts.indexOf(account)).setBalance(account.getBalance() -amount);
+    	return true;
+    }
+    
+    public boolean isTransfer(Account sender,Account receiver, int amount) {
+    	if(isValidAccount(receiver)) {
+    		List<Account> accounts = ewallet.getAccounts();
+    		for (Account acc : accounts) {
+    			if (acc.equals(sender)) {
+    				acc.setBalance(acc.getBalance() - amount);
+    				if (acc.equals(receiver)) {
+						acc.setBalance(acc.getBalance() + amount);
+						return true;
+					}
+    			}
+    		}
+    	}
+    	System.out.println("Transfer failed due to receiver account issues.");
+        return false;  
+    }
+    
+    public boolean showBalance(Account account) {
+    	  
+    	if (isValidAccount(account))
+    	{
+    		List<Account> accounts = ewallet.getAccounts();
+    		for (Account acc : accounts) {
+    			if (acc.equals(account)) {
+    				acc.getBalance();
+    				return true;
+    			}
+    		}
+    	}
+    	
+    	return false;
+    	}
+    
+    public boolean showDetails(Account account) {
+  	  
+    	if (isValidAccount(account))
+    	{
+    		List<Account> accounts = ewallet.getAccounts();
+    		for (Account acc : accounts) {
+    			if (acc.equals(account)) {
+    				acc.getUserName();
+    				acc.getBalance();
+    				acc.getActive();
+    				
+    				
+    				return true;
+    			}
+    		}
+    	}
+    	
+    	return false;
+    	}
+  
  
     
     
