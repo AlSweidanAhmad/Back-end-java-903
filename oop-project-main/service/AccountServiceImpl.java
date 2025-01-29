@@ -15,13 +15,15 @@ import model.Ewallet;
 
 public class AccountServiceImpl implements AccountService {
 
-    Ewallet ewallet = Ewallet.getInstance();
+	private Ewallet ewallet = Ewallet.getInstance();
+    private List<Account> accounts = ewallet.getAccounts();
+
 
 
     // Check if the account exists   
     private boolean isExistingAccount(Account account) {
-    	List<Account> accounts = ewallet.getAccounts();
-    	for (Account isAccount : accounts) 
+    	
+    	for (Account isAccount : this.accounts) 
     		if(isAccount.getUserName().equals(account.getUserName()))
     			return true;//Account exists 	
     	return false;//Account exists does not
@@ -30,8 +32,7 @@ public class AccountServiceImpl implements AccountService {
     
     @Override
     public Account geAccountByname(String name) {
-		List<Account> accounts = ewallet.getAccounts();
-		for (Account account : accounts) {
+		for (Account account : this.accounts) {
 			if (account.getUserName().equals(name)) {
 				return account;
 			}
@@ -57,9 +58,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public boolean loginAccount(Account account) {
 
-        List<Account> accounts = ewallet.getAccounts();
-        System.out.println(accounts.size());
-        for (Account isAccount : accounts) {
+        for (Account isAccount : this.accounts) {
             if (isAccount.getUserName().equals(account.getUserName())) {
                 if (isAccount.getPassword().equals(account.getPassword())) {
                     return true; // Login success
@@ -95,76 +94,74 @@ public class AccountServiceImpl implements AccountService {
     }
     public boolean isDeposit(Account account, int amount) {
 
-        List<Account> accounts = ewallet.getAccounts();     
-        accounts.get(accounts.indexOf(account)).setBalance(account.getBalance() +amount);
+    	this.accounts.get(this.accounts.indexOf(account)).setBalance(account.getBalance() +amount);
     	return true;
     }
     
     
     public boolean isWithdraw(Account account, int amount) {
   
-        List<Account> accounts = ewallet.getAccounts();     
         // Check sufficient balance
-    	if (accounts.get(accounts.indexOf(account)).getBalance()<amount) {
+    	if (this.accounts.get(this.accounts.indexOf(account)).getBalance()<amount) {
     		System.out.println("Insufficient funds. Withdrawal failed.");
     		return false;
     	}
-        accounts.get(accounts.indexOf(account)).setBalance(account.getBalance() -amount);
+        this.accounts.get(this.accounts.indexOf(account)).setBalance(account.getBalance() -amount);
     	return true;
     }
     
     public boolean isTransfer(Account sender,Account receiver, int amount) {
-    	if(isValidAccount(receiver)) {
-    		List<Account> accounts = ewallet.getAccounts();
-    		for (Account acc : accounts) {
-    			if (acc.equals(sender)) {
-    				acc.setBalance(acc.getBalance() - amount);
-    				if (acc.equals(receiver)) {
-						acc.setBalance(acc.getBalance() + amount);
-						return true;
-					}
-    			}
-    		}
-    	}
-    	System.out.println("Transfer failed due to receiver account issues.");
-        return false;  
+        if (!isValidAccount(receiver)) {
+            System.out.println("Transfer failed due to receiver account issues.");
+            return false;
+        }
+
+        int indexOfSender = this.accounts.indexOf(sender);
+        int indexOfReceiver = this.accounts.indexOf(receiver);
+
+        if (indexOfSender == -1 || indexOfReceiver == -1) {
+            System.out.println("Sender or receiver account not found.");
+            return false;
+        }
+
+        if (sender.getBalance() < amount) {
+            System.out.println("Insufficient funds. Transfer failed.");
+            return false;
+        }
+
+        // Transfer logic
+        this.accounts.get(indexOfSender).setBalance(sender.getBalance() - amount);
+        this.accounts.get(indexOfReceiver).setBalance(receiver.getBalance() + amount);
+        return true;
     }
     
     public boolean showBalance(Account account) {
-    	  
-    	if (isValidAccount(account))
-    	{
-    		List<Account> accounts = ewallet.getAccounts();
-    		for (Account acc : accounts) {
-    			if (acc.equals(account)) {
-    				acc.getBalance();
-    				return true;
-    			}
-    		}
-    	}
-    	
-    	return false;
+        int indexOfAccount = this.accounts.indexOf(account);
+
+        if (indexOfAccount == -1) {
+            System.out.println("Sender or receiver account not found.");
+            return false;
+        }
+        // Transfer logic
+        System.out.println(this.accounts.get(indexOfAccount).getBalance());
+        return true;
+
     	}
     
     public boolean showDetails(Account account) {
-  	  
-    	if (isValidAccount(account))
-    	{
-    		List<Account> accounts = ewallet.getAccounts();
-    		for (Account acc : accounts) {
-    			if (acc.equals(account)) {
-    				acc.getUserName();
-    				acc.getBalance();
-    				acc.getActive();
-    				
-    				
-    				return true;
-    			}
-    		}
-    	}
-    	
-    	return false;
-    	}
+        int indexOfAccount = this.accounts.indexOf(account);
+
+        if (indexOfAccount == -1) {
+            System.out.println("Sender or receiver account not found.");
+            return false;
+        }
+        // Transfer logic
+        System.out.println("Account Details:");
+        System.out.println("Name: " + this.accounts.get(indexOfAccount).getUserName());
+        System.out.println("Status: Active");
+        System.out.println("Balance: " + this.accounts.get(indexOfAccount).getBalance());
+        return true;
+    }
   
  
     

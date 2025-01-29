@@ -84,6 +84,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             System.out.println("Account not Created Because There exist account with same user name");
         }
 
+
     }
     /**
      * 
@@ -119,6 +120,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         } else {
             System.out.println("Account not Exist");
         }
+
 
     }
     private void services() {
@@ -162,7 +164,6 @@ public class ApplicationServiceImpl implements ApplicationService {
 		}
         } while (choose != 6);        // TODO create switch case such as on run function
         // TODO every case on switch call function  don't forget (Invalid choose)
-        scanner.close();
     }
     // # create deposit function
     void deposit(Account account){
@@ -181,7 +182,7 @@ public class ApplicationServiceImpl implements ApplicationService {
           System.out.println("Deposit failed due to invalid amount.");
           return;
       }
-      // Validation of the Account
+      // Validation of the Account ???
       if (!accountService.isDeposit(account,amount)) {
           System.out.println("Deposit failed due to account issues.");
           return;
@@ -218,11 +219,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             System.out.println("Withdraw failed due to account issues.");
             return;
         }
-        // Check sufficient balance
 
         
         // Make a Withdrawal
-  		account.setBalance(account.getBalance() - amount);
   		System.out.println("Withdrawal successful. New balance: " + account.getBalance());
 
   	}
@@ -237,72 +236,56 @@ public class ApplicationServiceImpl implements ApplicationService {
             return;
         }
 
-        // Details anzeigen
-        System.out.println("Account Details:");
-        System.out.println("Name: " + account.getUserName());
-        System.out.println("Status: Active");
-        System.out.println("Balance: " + account.getBalance());
         // System.out.println("Status: " + (account.getActive() ? "Active" : "Inactive"));
     }
     void showBalance(Account account)
     {	
+        System.out.println("showBalance failed due to account issues.");
+
         AccountServiceImpl accountService = new AccountServiceImpl();
-
         // validate Accounts
-        if (!accountService.isValidAccount(account)) {
-            System.out.println("showDetails failed due to account issues.");
+        if (!accountService.showBalance(account))
+            System.out.println("showBalance failed due to account issues.");
             return;
-        }
-        // Balance show
-
-        System.out.println("Balance: " + account.getBalance());
     }
     // #    
     void transfer(Account withdrawAccount){
         Scanner scanner = new Scanner(System.in);
-        AccountServiceImpl accountService= new AccountServiceImpl();
+        AccountServiceImpl accountService = new AccountServiceImpl();
         ValidationServiceImpl validationService = new ValidationServiceImpl();
 
         int amount;
         final int minAmount = 1;
-        final int maxAmount =  (int) withdrawAccount.getBalance();
+        final int maxAmount = (int) withdrawAccount.getBalance();
 
-        
         System.out.println("Enter the amount between " + minAmount + " and " + maxAmount + " to Transfer:");
         amount = scanner.nextInt();
         scanner.nextLine();
-        
-        // Validation of the amount
-        if (! validationService.validateAmount(amount,  minAmount, maxAmount)) {
+
+        // Validate amount
+        if (!validationService.validateAmount(amount, minAmount, maxAmount)) {
             System.out.println("Transfer failed due to invalid amount.");
             return;
         }
-//        // Check sufficient balance
-//        if (withdrawAccount.getBalance() < amount) {
-//            System.out.println("Insufficient funds. Transfer failed.");
-//            return;
-//        }
-//        
-//
-//        // Validation of the Account
-//        if (!accountService.isValidAccount(withdrawAccount)) {
-//            System.out.println("Transfer failed due to sender account issues.");
-//            return;
-//        }
 
-        String receiverName;
         System.out.println("Please enter the Receiver name: ");
-        receiverName = scanner.nextLine();
-        this.receiverAccount = accountService.geAccountByname(receiverName);
+        String receiverName = scanner.nextLine();
+        Account receiverAccount = accountService.geAccountByname(receiverName);
 
-        
-		
-        withdrawAccount.setBalance(withdrawAccount.getBalance() - amount);
-		this.receiverAccount.setBalance(this.receiverAccount.getBalance() + amount);
-        System.out.println("Transfer successful.");
+        if (receiverAccount == null) {
+            System.out.println("Receiver account not found. Transfer failed.");
+            return;
+        }
+
+        if (accountService.isTransfer(withdrawAccount, receiverAccount, amount)) {
+            System.out.println("Transfer successful.");
+        } else {
+            System.out.println("Transfer failed.");
+        }
         	
 
     }
+    
 
 
 }
